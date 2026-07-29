@@ -87,10 +87,6 @@
   .btn:hover{transform:translateY(-3px); box-shadow:0 16px 30px rgba(43,13,16,0.35);}
   .btn.gold{background:linear-gradient(160deg, var(--gold-light), var(--gold)); color:var(--wine); border-color:var(--gold-dark);}
 
-  .custom-modal .btn.gold {
-    width: auto; padding: 8px 35px; margin-top: 0; font-size: 16px;
-  }
-
   /* ============ الديكورات ============ */
   .corner-floral{
     position:fixed; width:150px; height:150px; z-index:2; pointer-events:none; opacity:.92;
@@ -242,7 +238,7 @@
     <source src="hussain_al_jasmi.mp3" type="audio/mpeg">
 </audio>
 
-<!-- صوت الكهربا المزعج 😂 (تأكد من إضافة ملف shock.mp3) -->
+<!-- صوت الكهربا المزعج 😂 -->
 <audio id="shock-sound">
     <source src="shock.mp3" type="audio/mpeg">
 </audio>
@@ -275,11 +271,13 @@
   </g>
 </svg>
 
-<!-- نافذة الرسايل المخصصة (بديل الـ Alert) -->
+<!-- نافذة الرسايل المخصصة (المقلب) -->
 <div id="custom-modal-overlay" class="custom-modal-overlay hidden">
   <div class="custom-modal">
     <p id="custom-modal-text"></p>
-    <button id="custom-modal-btn" class="btn gold">تمام 😂</button>
+    <div id="modal-buttons" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+       <!-- الزراير هتتضاف هنا برمجياً -->
+    </div>
   </div>
 </div>
 
@@ -369,26 +367,48 @@
   // متغيرات النافذة المنبثقة
   const modalOverlay = document.getElementById('custom-modal-overlay');
   const modalText = document.getElementById('custom-modal-text');
-  const modalBtn = document.getElementById('custom-modal-btn');
+  const modalButtons = document.getElementById('modal-buttons');
   
   let isPlaying = false;
   let isPrankDone = false;
   let isPrankRunning = false;
-  let modalCallback = null;
 
-  // إخفاء النافذة وتنفيذ الخطوة اللي بعدها
-  modalBtn.addEventListener('click', () => {
-    modalOverlay.classList.remove('show');
-    if (modalCallback) {
-       setTimeout(modalCallback, 300); // تأخير بسيط عشان الأنميشن
+  // التعامل مع ضغطات الزراير جوه النافذة
+  modalButtons.addEventListener('click', (e) => {
+    if (e.target.id === 'btn-step1') {
+      // نقل للخطوة التانية
+      showStep2();
+    } else if (e.target.id === 'btn-normal') {
+      // لو داس على تمام العادية (رسالة المتصفح العادية هنا هتقوم بالواجب عشان تغيظه ومتقفلش المربع)
+      alert("روح ياسطا دوس على زرار تمااااام ومتهزرش معايا تاني 😒");
+    } else if (e.target.id === 'btn-super') {
+      // لو داس على تمااااام الدهبي
+      alert("شااااااطرين 😂 🎉");
+      modalOverlay.classList.remove('show');
+      
+      // فتح الظرف بعد ما المقلب يخلص
+      setTimeout(() => {
+        isPrankDone = true;
+        isPrankRunning = false;
+        openEnvelope();
+      }, 300);
     }
   });
 
-  // دالة تشغيل النافذة المنبثقة
-  function showMessage(text, callback) {
-    modalText.innerText = text;
-    modalCallback = callback;
+  // دالة عرض الخطوة الأولى
+  function showStep1() {
+    modalText.innerText = "خليكوا فريش كدا احنا في فرح😂😂😂";
+    modalButtons.innerHTML = '<button id="btn-step1" class="btn gold" style="width: auto; padding: 8px 35px; margin-top: 0; font-size: 16px;">تمام 😂</button>';
     modalOverlay.classList.add('show');
+  }
+
+  // دالة عرض الخطوة التانية بالزرارين
+  function showStep2() {
+    modalText.innerHTML = "لا قول تمااااام من قلبك وبنفس كدا😏<br>والوقتي ادامك اختيارين تمام عاديه وتمااااااام بإنشكااااااح";
+    modalButtons.innerHTML = `
+      <button id="btn-normal" class="btn" style="width: 45%; padding: 8px 10px; margin-top: 0; font-size: 16px;">تمام</button>
+      <button id="btn-super" class="btn gold" style="width: 45%; padding: 8px 10px; margin-top: 0; font-size: 16px;">تمااااااام</button>
+    `;
   }
 
   // التفاعل مع الظرف والمقلب
@@ -412,15 +432,8 @@
         shockSound.pause(); // نوقف الصوت
         shockSound.currentTime = 0; // نرجعه للأول
         
-        // 3. تسلسل الرسايل الشيك
-        showMessage("خليكوا فريش كدا احنا في فرح😂😂😂", () => {
-          showMessage("ممكن نتكلم جد شويه بقا عيب كدا 🙄", () => {
-            // بعد الرسالة التانية نفتح الظرف
-            isPrankDone = true;
-            isPrankRunning = false;
-            openEnvelope();
-          });
-        });
+        // 3. تشغيل المقلب
+        showStep1();
 
       }, 600);
       
