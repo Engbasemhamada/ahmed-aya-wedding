@@ -379,19 +379,29 @@
       // نقل للخطوة التانية
       showStep2();
     } else if (e.target.id === 'btn-normal') {
-      // لو داس على تمام العادية (رسالة المتصفح العادية هنا هتقوم بالواجب عشان تغيظه ومتقفلش المربع)
-      alert("روح ياسطا دوس على زرار تمااااام ومتهزرش معايا تاني 😒");
-    } else if (e.target.id === 'btn-super') {
-      // لو داس على تمااااام الدهبي
-      alert("شااااااطرين 😂 🎉");
-      modalOverlay.classList.remove('show');
+      // لو داس على تمام العادية (هتظهر جوه القالب الشيك)
+      modalText.innerHTML = "روح ياسطا دوس على زرار تمااااام ومتهزرش معايا تاني 😒";
+      modalButtons.innerHTML = ''; // نخفي الزراير لحظة عشان يقرأ
       
-      // فتح الظرف بعد ما المقلب يخلص
+      // نرجع نخليه يختار تاني بعد ثانيتين
       setTimeout(() => {
-        isPrankDone = true;
-        isPrankRunning = false;
-        openEnvelope();
-      }, 300);
+        showStep2();
+      }, 2000);
+      
+    } else if (e.target.id === 'btn-super') {
+      // لو داس على تمااااام الدهبي بإنشكاح
+      modalText.innerHTML = "شااااااطرين 😂 🎉";
+      modalButtons.innerHTML = ''; // نخفي الزراير
+      
+      // يستنى ثانية ونص يقرأ الرسالة وبعدين يفتح الظرف
+      setTimeout(() => {
+        modalOverlay.classList.remove('show');
+        setTimeout(() => {
+          isPrankDone = true;
+          isPrankRunning = false;
+          openEnvelope();
+        }, 300); // وقت الأنيميشن بتاع القفل
+      }, 1500); 
     }
   });
 
