@@ -51,6 +51,47 @@
     animation: shock-animation 0.1s infinite;
   }
 
+  /* ============ نافذة الرسايل المخصصة (Modal) ============ */
+  .custom-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 2000; display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden; transition: all 0.3s ease;
+    backdrop-filter: blur(3px);
+  }
+  .custom-modal-overlay.show {
+    opacity: 1; visibility: visible;
+  }
+  .custom-modal {
+    background: var(--paper); border: 2px solid var(--gold-dark);
+    border-radius: 12px; padding: 30px 20px; width: 85%; max-width: 350px;
+    text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  .custom-modal-overlay.show .custom-modal {
+    transform: scale(1);
+  }
+  .custom-modal p {
+    font-family: 'Cairo', sans-serif; font-size: 17px; font-weight: 700;
+    color: var(--wine); margin-bottom: 25px; line-height: 1.6;
+  }
+  
+  .btn{
+    display:inline-flex; align-items:center; justify-content: center; gap:8px;
+    background:linear-gradient(160deg, var(--wine-3), var(--wine));
+    color:var(--gold-light); padding:14px 30px; border-radius:6px;
+    text-decoration:none; font-size:14.5px; font-weight:600; letter-spacing:1px;
+    border:1px solid rgba(201,162,75,0.5); cursor:pointer; 
+    transition:transform .3s ease, box-shadow .3s ease;
+    box-shadow:0 10px 22px rgba(43,13,16,0.3); width: 100%; margin-top: 15px;
+  }
+  .btn:hover{transform:translateY(-3px); box-shadow:0 16px 30px rgba(43,13,16,0.35);}
+  .btn.gold{background:linear-gradient(160deg, var(--gold-light), var(--gold)); color:var(--wine); border-color:var(--gold-dark);}
+
+  .custom-modal .btn.gold {
+    width: auto; padding: 8px 35px; margin-top: 0; font-size: 16px;
+  }
+
+  /* ============ الديكورات ============ */
   .corner-floral{
     position:fixed; width:150px; height:150px; z-index:2; pointer-events:none; opacity:.92;
   }
@@ -67,9 +108,7 @@
     display: none; transition: all 0.3s ease;
     align-items: center; gap: 8px;
   }
-  .music-btn.playing {
-    background: var(--wine); color: var(--gold-light);
-  }
+  .music-btn.playing { background: var(--wine); color: var(--gold-light); }
   .music-btn svg { width: 16px; height: 16px; fill: currentColor; }
 
   /* ============ الظرف ============ */
@@ -189,17 +228,6 @@
   .venue-card img{width:100%; display:block; filter:saturate(1.02) contrast(1.02);}
   .venue-info{background:var(--paper); padding:24px;}
   .venue-info h3{font-family:'Aref Ruqaa',serif; color:var(--wine); font-size:27px; margin-bottom:6px;}
-  
-  .btn{
-    display:inline-flex; align-items:center; justify-content: center; gap:8px;
-    background:linear-gradient(160deg, var(--wine-3), var(--wine));
-    color:var(--gold-light); padding:14px 30px; border-radius:4px;
-    text-decoration:none; font-size:14.5px; font-weight:600; letter-spacing:1px;
-    border:1px solid rgba(201,162,75,0.5); cursor:pointer; 
-    transition:transform .3s ease, box-shadow .3s ease;
-    box-shadow:0 10px 22px rgba(43,13,16,0.3); width: 100%; margin-top: 15px;
-  }
-  .btn:hover{transform:translateY(-3px); box-shadow:0 16px 30px rgba(43,13,16,0.35);}
 
   footer{padding:40px 20px 64px; text-align:center; background: var(--wine); color:var(--gold-light); font-size:15px; margin-top: 40px;}
   footer .fname{font-family:'Aref Ruqaa',serif; font-size:20px; line-height: 1.8; margin-top: 15px;}
@@ -212,6 +240,11 @@
 <!-- الخلفية الموسيقية -->
 <audio id="bg-music" loop>
     <source src="hussain_al_jasmi.mp3" type="audio/mpeg">
+</audio>
+
+<!-- صوت الكهربا المزعج 😂 (تأكد من إضافة ملف shock.mp3) -->
+<audio id="shock-sound">
+    <source src="shock.mp3" type="audio/mpeg">
 </audio>
 
 <button id="music-btn" class="music-btn">
@@ -241,6 +274,14 @@
     <circle cx="24" cy="16" r="2"/><circle cx="31" cy="11" r="1.6"/><circle cx="14" cy="29" r="1.8"/>
   </g>
 </svg>
+
+<!-- نافذة الرسايل المخصصة (بديل الـ Alert) -->
+<div id="custom-modal-overlay" class="custom-modal-overlay hidden">
+  <div class="custom-modal">
+    <p id="custom-modal-text"></p>
+    <button id="custom-modal-btn" class="btn gold">تمام 😂</button>
+  </div>
+</div>
 
 <div id="envelope-screen">
   <div class="stage">
@@ -316,23 +357,51 @@
 </div>
 
 <script>
-  // تعريف المتغيرات
+  // تعريف المتغيرات الأساسية
   const envWrap = document.getElementById('envelopeWrap');
   const envScreen = document.getElementById('envelope-screen');
   const site = document.getElementById('site');
   const musicBtn = document.getElementById('music-btn');
   const bgMusic = document.getElementById('bg-music');
+  const shockSound = document.getElementById('shock-sound');
   const musicText = document.getElementById('music-text');
   
+  // متغيرات النافذة المنبثقة
+  const modalOverlay = document.getElementById('custom-modal-overlay');
+  const modalText = document.getElementById('custom-modal-text');
+  const modalBtn = document.getElementById('custom-modal-btn');
+  
   let isPlaying = false;
-  let isPrankDone = false; // عشان المقلب يحصل مرة واحدة بس
+  let isPrankDone = false;
+  let isPrankRunning = false;
+  let modalCallback = null;
 
+  // إخفاء النافذة وتنفيذ الخطوة اللي بعدها
+  modalBtn.addEventListener('click', () => {
+    modalOverlay.classList.remove('show');
+    if (modalCallback) {
+       setTimeout(modalCallback, 300); // تأخير بسيط عشان الأنميشن
+    }
+  });
+
+  // دالة تشغيل النافذة المنبثقة
+  function showMessage(text, callback) {
+    modalText.innerText = text;
+    modalCallback = callback;
+    modalOverlay.classList.add('show');
+  }
+
+  // التفاعل مع الظرف والمقلب
   envWrap.addEventListener('click', () => {
+    if(isPrankRunning) return; // عشان لو داس مرتين والمقلب شغال
+
     if (!isPrankDone) {
-      // 1. تشغيل تأثير الكهرباء والفيبريشن
+      isPrankRunning = true;
+      
+      // 1. تشغيل صوت الكهربا والفيبريشن والشاشة
+      shockSound.play().catch(e => console.log(e));
       document.body.classList.add('shock-active');
       
-      // أمر الفيبريشن للموبايل (هزات سريعة ورا بعض)
       if (navigator.vibrate) {
         navigator.vibrate([50, 50, 50, 50, 50, 50, 200]); 
       }
@@ -340,20 +409,22 @@
       // 2. بعد 600 مللي ثانية (وقت الكهربا) نوقف التأثير ونطلع الرسايل
       setTimeout(() => {
         document.body.classList.remove('shock-active');
+        shockSound.pause(); // نوقف الصوت
+        shockSound.currentTime = 0; // نرجعه للأول
         
-        // نطلع الرسايل ورا بعض بتأخير بسيط عشان المتصفح
-        setTimeout(() => {
-          alert("خليكوا فريش كدا احنا في فرح😂😂😂");
-          alert("ممكن نتكلم جد شويه بقا عيب كدا 🙄");
-          
-          // 3. بعد الرسايل، نأكد إن المقلب اتعمل ونكمل فتح الظرف
-          isPrankDone = true;
-          openEnvelope();
-        }, 100); 
+        // 3. تسلسل الرسايل الشيك
+        showMessage("خليكوا فريش كدا احنا في فرح😂😂😂", () => {
+          showMessage("ممكن نتكلم جد شويه بقا عيب كدا 🙄", () => {
+            // بعد الرسالة التانية نفتح الظرف
+            isPrankDone = true;
+            isPrankRunning = false;
+            openEnvelope();
+          });
+        });
+
       }, 600);
       
     } else {
-      // لو المقلب اتعمل واليوزر داس تاني، يفتح الظرف علطول
       openEnvelope();
     }
   });
@@ -375,7 +446,7 @@
     }, 1500);
   }
 
-  // التحكم في الموسيقى
+  // التحكم في موسيقى الفرح
   musicBtn.addEventListener('click', () => {
     if(isPlaying) {
       bgMusic.pause();
